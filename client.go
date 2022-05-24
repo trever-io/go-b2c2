@@ -63,6 +63,24 @@ func (c *Client) privateGet(endpoint string) ([]byte, error) {
 	return c.doRequest(req)
 }
 
+func (c *Client) privateGetWithParams(endpoint string, parameters map[string]string) ([]byte, error) {
+	url := fmt.Sprintf("%v/%v", c.apiUrl, endpoint)
+	req, err := http.NewRequest(http.MethodGet, url, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	q := req.URL.Query()
+	for k, v := range parameters {
+		q.Add(k, v)
+	}
+
+	req.URL.RawQuery = q.Encode()
+
+	c.addAuthorization(req)
+	return c.doRequest(req)
+}
+
 func (c *Client) privatePost(endpoint string, data any) ([]byte, error) {
 	url := fmt.Sprintf("%v/%v", c.apiUrl, endpoint)
 	b, err := json.Marshal(data)

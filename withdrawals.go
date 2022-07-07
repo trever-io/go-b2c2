@@ -16,6 +16,12 @@ type withdrawalRequest struct {
 	DestinationAddress *DestinationAddress `json:"destination_address"`
 }
 
+type fiatWithdrawalRequest struct {
+	Amount                 string `json:"amount"`
+	Currency               string `json:"currency"`
+	DestinationBankAccount string `json:"destination_bank_account"`
+}
+
 type Withdrawal struct {
 	Amount                 string             `json:"amount"`
 	Currency               string             `json:"currency"`
@@ -48,6 +54,24 @@ func (c *Client) CreateWithdrawal(currency string, amount string, address string
 			AddressSuffix:   suffix,
 			AddressProtocol: protocol,
 		},
+	}
+
+	b, err := c.privatePost(WITHDRAWALS_ENDPOINT, req)
+	if err != nil {
+		return nil, err
+	}
+
+	result := new(Withdrawal)
+	err = json.Unmarshal(b, result)
+
+	return result, err
+}
+
+func (c *Client) CreateFiatWithdrawal(currency string, amount string, bank_account string) (*Withdrawal, error) {
+	req := fiatWithdrawalRequest{
+		Amount:                 amount,
+		Currency:               currency,
+		DestinationBankAccount: bank_account,
 	}
 
 	b, err := c.privatePost(WITHDRAWALS_ENDPOINT, req)
